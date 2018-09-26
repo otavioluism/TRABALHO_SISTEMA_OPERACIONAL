@@ -11,22 +11,15 @@
 #include <windows.h>
 #include <locale.h>
 
-//#include <dirent.h>
-//#include <pthread.h>
-//#include <semaphore.h>
-//#include <sys/stat.h>
-
-
 #define SERVER_IP "127.0.0.1"
 #define BYTE 1024
 #define PORTA 5000
 #define TITULO "\n ###### EXPLORADOR DE ARQUIVOS CLIENTE ######\n\n"
 
+/* Declaração de Métodos */
 void imprimirAguarde(void);
 
-/************************
-*          MAIN         *
-************************/
+
 int main(int argc, char *argv[])
 {
 
@@ -36,14 +29,14 @@ int main(int argc, char *argv[])
     struct sockaddr_in serv;
     system("clear");
 
-    /**INICIALIZA ESTRUTURA SOCKETS*/
+    /**Estrutura os campos do struct*/
     skt = socket(AF_INET, SOCK_STREAM, 6);
     serv.sin_family = AF_INET;
     serv.sin_addr.s_addr = inet_addr(SERVER_IP);
     serv.sin_port = htons (PORTA);
     memset (&(serv.sin_zero), 0x00, sizeof (serv.sin_zero));
 
-    /**INICIA COMUNICAÇÃO COM SERVIDOR*/
+    /**Inicializa a comunicação com o Servidor*/
     while(connect (skt, (struct sockaddr *)&serv, sizeof (struct sockaddr)) != 0){
         imprimirAguarde();      ///AGUARDA SERVIDOR SE COMUNICAR
     }
@@ -51,17 +44,17 @@ int main(int argc, char *argv[])
     printf(">> Envie sair pra encerrar ou -h para ajuda \n\n");
 
 
-    /**RECEBE MENSAGEM DO SERVIDOR*/
+    /**Recebe Mensagem do Servidor*/
     tbuf = recv (skt, mensagem, BYTE, 0);
     mensagem[tbuf] = 0x00;
     printf (">: %s\n",mensagem);
 
-    /**ENVIA MENSAGEM PARA O SERVIDOR*/
+    /**Envia mensagem para o Servidor*/
     //strcpy(mensagem, "Cliente diz: olá!!!");
     //send(skt, mensagem, strlen(mensagem), 0 );
 
 
-    /**LOOP DE COMUNICAÇÃO ENTRE CLIENTE E SERVIDOR*/
+    /**Loop de Comunicação entre Cliente e Servidor*/
     do{
         ///envia
         printf("> ");
@@ -71,28 +64,22 @@ int main(int argc, char *argv[])
 
 		if (strcmp(mensagem,"sair")!= 0)
 		{
-			///recebe
 			tbuf = recv (skt, mensagem, BYTE, 0);
 			mensagem[tbuf] = 0x00;
 			printf ("> %s\n",mensagem);
 		}
+    }while(strcmp(mensagem,"sair")!= 0);
 
-    }while(strcmp(mensagem,"sair")!= 0);    ///COMUNICAÇÃO SE ENCERRA QUANDO USUARIO DIGITAR sair
 
-
-    /**FINALIZA CONEXÃO*/
+    /**Finaliza a conexão! */
     close(skt);
     printf (">>A conexão com o servidor foi finalizada!!!\n\n");
 	sleep(3);
     exit(0);
 }
 
+/* Função responsável por imprimir mensagem na tela enquanto aguarda algum servidor estabelecer comunicação */
 
-
-/**************************************************************
-*   FUNÇÃO RESPOSÁVEL POR IMPRIMIR MENSAGER NA TELA           *
-*   ENQUANTO AGUARDA ALGUM SERVIDOR ESTABELECER COMUNICAÇÃO   *
-***************************************************************/
 void imprimirAguarde(){
     int i=0;
     char dot[12] = "";

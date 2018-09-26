@@ -15,7 +15,7 @@
 //#include <semaphore.h>
 //#include <sys/stat.h>
 
-#define BYTE 1024
+#define BYTE 16384
 #define PORTA 5000
 #define BACKLOG 10
 
@@ -35,7 +35,7 @@ void Invalido(int connfd);
 
 int main(int argc, char *argv[]){
 	
-	setlocale(LC_ALL, "Portuguese"); //funcao para oolocar assentos 
+	setlocale(LC_ALL, "Portuguese");
 	
 	/*Listen File Descriptor (listenfd) and Conection File Descriptor (connfd)*/
 
@@ -197,9 +197,6 @@ int main(int argc, char *argv[]){
 	}
 }
 
-
-
-// FUNCAO PARA MENU -- ajuda ao cliente 
 void Ajuda(int connfd)
 {
 	char sendBuff[BYTE];
@@ -212,19 +209,47 @@ void Ajuda(int connfd)
 }
 
 
-// CRIAR FUNCAO PARA CRIAR DIRETORIO
-void Criar_DIR(int connfd)
 
+void Criar_DIR(int connfd)
+{
+	char sendBuff[BYTE];
+	char recvBuff[BYTE];
+	//char current_dir_name[BYTE];
+	int tamBuff=0;
+
+	//getcwd(current_dir_name, sizeof(current_dir_name));
+	//printf("%s\n",current_dir_name);
+	
+	snprintf(sendBuff, sizeof(sendBuff), "Criar diretório, digite o nome: \n");
+	send(connfd,sendBuff,strlen(sendBuff), 0);
+	
+	tamBuff = recv(connfd,recvBuff,BYTE, 0);
+	recvBuff[tamBuff] = 0x00;
+	
+	char comando[1024]  = "mkdir ";
+	strcat(comando,recvBuff);
+		
+	if (system(comando) == 0)
+	{
+		snprintf(sendBuff, sizeof(sendBuff), "Diretório criado com sucesso. \n");
+		send(connfd,sendBuff,strlen(sendBuff), 0);
+	}else
+		{			
+		snprintf(sendBuff, sizeof(sendBuff), "Erro ao criar diretório. \n");
+		send(connfd,sendBuff,strlen(sendBuff), 0);
+		}
 }
 
-// CRIAR FUNCAO PARA REMOVER DIRETORIO 
+
+
 void Remover_DIR(int connfd)
 {
-
+	
+	
 }  
 
 
-// CRIAR FUNCAO PARA ENTRAR NO DIRETORIO 
+
 void Entrar_DIR(int connfd)
 {
 	
@@ -232,7 +257,7 @@ void Entrar_DIR(int connfd)
 } 
 
 
-// CRIAR FUNCAO PARA MOSTRAR DIRETORIO 
+
 void Mostrar_DIR(int connfd)
 {
 	
@@ -240,47 +265,216 @@ void Mostrar_DIR(int connfd)
 } 
 
 
-// CRIAR FUNCAO PARA CRIAR ARQUIVO 
+
 void Criar_FILE(int connfd)
 {
+	char sendBuff[BYTE];
+	char recvBuff[BYTE];
+	//char current_dir_name[BYTE];
+	int tamBuff=0;
 
+	//getcwd(current_dir_name, sizeof(current_dir_name));
+	//printf("%s\n",current_dir_name);
+	
+	snprintf(sendBuff, sizeof(sendBuff), "Criar arquivo, digite o nome: \n");
+	send(connfd,sendBuff,strlen(sendBuff), 0);
+	
+	tamBuff = recv(connfd,recvBuff,BYTE, 0);
+	recvBuff[tamBuff] = 0x00;
+	
+	char comando[1024]  = "touch ";
+	strcat(comando,recvBuff);
+		
+	if (system(comando) == 0)
+	{
+		snprintf(sendBuff, sizeof(sendBuff), "Arquivo criado com sucesso. \n");
+		send(connfd,sendBuff,strlen(sendBuff), 0);
+	}else
+		{			
+		snprintf(sendBuff, sizeof(sendBuff), "Erro ao criar arquivo. \n");
+		send(connfd,sendBuff,strlen(sendBuff), 0);
+		}
 }
 
 
-// CRIAR FUNCAO PARA REMOVER ARQUIVO 
+
 void Remover_FILE(int connfd)
 {
+	char sendBuff[BYTE];
+	char recvBuff[BYTE];
+	//char current_dir_name[BYTE];
+	int tamBuff=0;
+
+	//getcwd(current_dir_name, sizeof(current_dir_name));
+	//printf("%s\n",current_dir_name);
+	
+	snprintf(sendBuff, sizeof(sendBuff), "Remover arquivo, digite o nome: \n");
+	send(connfd,sendBuff,strlen(sendBuff), 0);
+	
+	tamBuff = recv(connfd,recvBuff,BYTE, 0);
+	recvBuff[tamBuff] = 0x00;
+	
+	char comando[BYTE]  = "rm ";
+	strcat(comando,recvBuff);
+	
+	if (system(comando) == 0)
+	{
+		snprintf(sendBuff, sizeof(sendBuff), "Arquivo removido com sucesso. \n");
+		send(connfd,sendBuff,strlen(sendBuff), 0);
+	}else
+		{			
+		snprintf(sendBuff, sizeof(sendBuff), "Erro ao remover arquivo. \n");
+		send(connfd,sendBuff,strlen(sendBuff), 0);
+		}
 	
 }  
 
 
-//CRIAR FUNCAO PARA ESQUEVER NO ARQUIVO 
+
 void Escrever_FILE(int connfd)
 {
+	
+	char sendBuff[BYTE];
+	char recvBuff[BYTE];
+	//char current_dir_name[BYTE];
+	int tamBuff=0;
 
+	//getcwd(current_dir_name, sizeof(current_dir_name));
+	//printf("%s\n",current_dir_name);
+	
+	snprintf(sendBuff, sizeof(sendBuff), "Escrever no arquivo, digite o nome: \n");
+	send(connfd,sendBuff,strlen(sendBuff), 0);
+	
+	tamBuff = recv(connfd,recvBuff,BYTE, 0);
+	recvBuff[tamBuff] = 0x00;
+ 
+		FILE *arquivo; 
+		arquivo = fopen(recvBuff,"a+");
+		
+		if(arquivo == NULL){
+			strcpy(sendBuff, "Falha ao abrir o arquivo!\n");
+			send(connfd, sendBuff, strlen(sendBuff), 0);
+		}else{
+			snprintf(sendBuff, sizeof(sendBuff), "Escreva no arquivo: \n");
+			send(connfd,sendBuff,strlen(sendBuff), 0);
+			
+			tamBuff = recv(connfd,recvBuff,BYTE, 0);
+			recvBuff[tamBuff] = 0x00;
+			
+			if((fprintf(arquivo,recvBuff))>0){
+				snprintf(sendBuff, sizeof(sendBuff), "Escrita no arquivo realizada com sucesso! \n");
+				send(connfd,sendBuff,strlen(sendBuff), 0);
+			}else{
+				snprintf(sendBuff, sizeof(sendBuff), "Escrita no arquivo não realizada com sucesso! \n");
+				send(connfd,sendBuff,strlen(sendBuff), 0);
+			}
+			//fwrite(sendBuff, sizeof(char), 1024, arquivo);	
+		}
+		fclose(arquivo);
 	
 } 
 
 
-// CRIAR FUNCAO PARA MOSTRAR O CONTEUDO DO ARQUIVO
+
 void Mostrar_FILE(int connfd)
 {
+	char sendBuff[BYTE];
+	char recvBuff[BYTE];
+	//char current_dir_name[BYTE];
+	int tamBuff=0;
+	int i;
+
+	//getcwd(current_dir_name, sizeof(current_dir_name));
+	//printf("%s\n",current_dir_name);
 	
+	snprintf(sendBuff, sizeof(sendBuff), "Listar arquivo, digite o nome: \n");
+	send(connfd,sendBuff,strlen(sendBuff), 0);
 	
+	tamBuff = recv(connfd,recvBuff,BYTE, 0);
+	recvBuff[tamBuff] = 0x00;
+	
+ 
+		FILE *arquivo; 
+		arquivo = fopen(recvBuff,"r");
+		
+		  if(arquivo == NULL){
+			strcpy(sendBuff, "Falha ao abrir arquivo!\n");
+			send(connfd, sendBuff, strlen(sendBuff), 0);
+		}else{
+			memset(sendBuff, 0, sizeof (sendBuff));
+			fread(sendBuff, sizeof(char), BYTE-1, arquivo);
+			strcat(sendBuff, "\n");
+			send(connfd, sendBuff, strlen(sendBuff), 0);
+		}
+		fclose(arquivo);
+		
 } 
 
 
-// CRIAR FUNCAO PARA LINHA DE COMANDO EX: mkdir nome.txt 
+
 void CMD(int connfd)
 {
+	char sendBuff[BYTE];
+	char recvBuff[BYTE];
+	//char current_dir_name[BYTE];
+	int tamBuff=0;
+
+	//getcwd(current_dir_name, sizeof(current_dir_name));
+	//printf("%s\n",current_dir_name);
 	
+	snprintf(sendBuff, sizeof(sendBuff), "Digite o comando: \n");
+	send(connfd,sendBuff,strlen(sendBuff), 0);
+	
+	tamBuff = recv(connfd,recvBuff,BYTE, 0);
+	recvBuff[tamBuff] = 0x00;
+
+	char comando[1024]  = "";
+	strcat(comando,recvBuff);
+	
+	if (system(comando) == 0)
+	{
+		snprintf(sendBuff, sizeof(sendBuff), "OK \n");
+		send(connfd,sendBuff,strlen(sendBuff), 0);
+	}else
+		{			
+		snprintf(sendBuff, sizeof(sendBuff), "Erro ao chamar comando. \n");
+		send(connfd,sendBuff,strlen(sendBuff), 0);
+		}
+		
 }
 
 
-// CRIAR FUNCAO PARA INVALIDO
+
 void Invalido(int connfd)
 {
+	char sendBuff[BYTE];
+	char recvBuff[BYTE];
+	//char current_dir_name[BYTE];
+	int tamBuff=0;
 
+	//getcwd(current_dir_name, sizeof(current_dir_name));
+	//printf("%s\n",current_dir_name);
+	
+	snprintf(sendBuff, sizeof(sendBuff), "Comando inválido. Ajuda -h \n");
+	send(connfd,sendBuff,strlen(sendBuff), 0);
 }
 
 
+/*
+
+		Em linux:
+
+		cd home/
+		gcc -o servidor.exe servidor.c
+		./servidor.exe
+	----------------------------------------------
+		Em Windows:
+
+		cd \
+		cd cygwin64
+		cd home
+		ls
+		gcc servidor.c -o servidor.exe
+		servidor.exe
+
+*/
